@@ -112,7 +112,7 @@ def load_model_from_file(filename):
     elif ext == '.json':
         model = load_json_model(filename)
     else:
-        raise Exception('Model file extension not supported for {0}'.format(filename))
+        raise IOError('Model file extension not supported for {0}'.format(filename))
 
     return model
 

@@ -34,11 +34,8 @@ def create_interaction_models(source_models, output_folder='data', n_processes=N
     with CreateModelPool(output_folder, n_processes=n_processes) as pool:
         for pair in itertools.combinations(source_models, 2):
             pool.submit([pair[0], pair[1]])
-        try:
-            for community_filename in pool.receive_all():
-                output_models.append(community_filename)
-        except Exception as e:
-            traceback.print_exc(file=sys.stdout)
+        for community_filename in pool.receive_all():
+            output_models.append(community_filename)
 
     return output_models
 
