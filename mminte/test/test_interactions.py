@@ -25,8 +25,8 @@ class TestInteractions:
         assert growth_rates.at[0,'B_CHANGE'] == pytest.approx(0.28507777)
 
     def test_not_enough_source(self, data_folder):
-        source_models = mminte.create_interaction_models([join(data_folder, 'BT.sbml')])
-        assert len(source_models) == 0
+        with pytest.raises(ValueError):
+             mminte.create_interaction_models([join(data_folder, 'BT.sbml')])
 
     def test_bad_source_file(self, data_folder):
         model_files = ['BT.sbml', 'FP.sbml', 'BAD.sbml']

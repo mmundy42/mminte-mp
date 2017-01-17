@@ -1,11 +1,8 @@
-import itertools
-from warnings import warn
-import pandas as pd
-import sys
-import traceback
+from itertools import combinations
+from pandas import DataFrame
+from multiprocessing import Pool, cpu_count
 
-from .job_pool import CreateModelPool, GrowthRatePool
-from .interaction_worker import growth_rate_columns
+from .interaction_worker import growth_rate_columns, create_pair_model, compute_growth_rates
 
 
 def create_interaction_models(source_models, output_folder='data', n_processes=None):
@@ -27,25 +24,23 @@ def create_interaction_models(source_models, output_folder='data', n_processes=N
     """
 
     if len(source_models) < 2:
-        warn('There must be at least two models in the list of source models')
-        return []
+        raise ValueError('There must be at least two models in the list of source models')
 
-    output_models = list()
-    with CreateModelPool(output_folder, n_processes=n_processes) as pool:
-        for pair in itertools.combinations(source_models, 2):
-            pool.submit([pair[0], pair[1]])
-        for community_filename in pool.receive_all():
-            output_models.append(community_filename)
-
+    if n_processes is None:
+        n_processes = min(cpu_count(), 4)
+    pool = Pool(n_processes)
+    result_list = [pool.apply_async(create_pair_model, (pair, output_folder))
+                   for pair in combinations(source_models, 2)]
+    output_models = [result.get() for result in result_list]
     return output_models
 
 
-def calculate_growth_rates(pair_model_filenames, media_filename, n_processes=None):
+def calculate_growth_rates(pair_models, media_filename, n_processes=None):
     """ Calculate growth rates for all pairs in community.
 
     Parameters
     ----------
-    pair_model_filenames : list of str
+    pair_models : list of str
         List of path names to two species community model files
     media_filename : str
         Path to file with exchange reaction bounds for media
@@ -58,11 +53,12 @@ def calculate_growth_rates(pair_model_filenames, media_filename, n_processes=Non
         Results of growth rate calculations
     """
 
-    growth_rates = pd.DataFrame(columns=growth_rate_columns)
-    with GrowthRatePool(media_filename, n_processes=n_processes) as pool:
-        for pair_model in pair_model_filenames:
-            pool.submit(pair_model)
-        for result in pool.receive_all():
-            growth_rates = growth_rates.append(result, ignore_index=True)
-
+    if n_processes is None:
+        n_processes = min(cpu_count(), 4)
+    pool = Pool(n_processes)
+    result_list = [pool.apply_async(compute_growth_rates, (pair_filename, media_filename))
+                   for pair_filename in pair_models]
+    growth_rates = DataFrame(columns=growth_rate_columns)
+    for result in result_list:
+        growth_rates = growth_rates.append(result.get(), ignore_index=True)
     return growth_rates

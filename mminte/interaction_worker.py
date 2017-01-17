@@ -1,6 +1,6 @@
 from cobra.io import save_json_model
 import json
-import pandas as pd
+from pandas import Series
 
 from .community import create_community_model, load_model_from_file, single_species_knockout
 
@@ -9,81 +9,66 @@ growth_rate_columns = ['A_ID', 'B_ID', 'TYPE', 'TOGETHER', 'A_TOGETHER', 'B_TOGE
                        'A_ALONE', 'B_ALONE', 'A_CHANGE', 'B_CHANGE']
 
 
-def create_pair_model(output_folder, job_queue, output_queue):
+def create_pair_model(pair, output_folder):
     """ Create a two species community model.
 
     Parameters
     ----------
+    pair : list of str
+        Each element is a path to a single species model file
     output_folder : str
         Path to output folder where community model JSON file is saved
-    job_queue : multiprocessing.Queue
-        Queue work is received from
-    output_queue : multiprocessing.Queue
-        Queue results are posted to
+
+    Returns
+    -------
+    str
+        Path to two species community model file
     """
 
-    while True:
-        # Wait for work from the job queue.
-        pair = job_queue.get()  # Format is a list with two model file names
-
-        # Create a two species community model and save it to the output folder.
-        try:
-            community = create_community_model(pair)
-            community_filename = '{0}/{1}.json'.format(output_folder, community.id)
-            save_json_model(community, community_filename)
-            result = community_filename
-        except Exception as e:
-            result = e
-
-        # Post results to the output queue.
-        output_queue.put(result)  # Format is path to community model file or exception
+    community = create_community_model(pair)
+    community_filename = '{0}/{1}.json'.format(output_folder, community.id)
+    save_json_model(community, community_filename)
+    return community_filename
 
 
-def compute_growth_rates(media_filename, job_queue, output_queue):
+def compute_growth_rates(pair_filename, media_filename):
     """ Compute growth rates for a two species community model.
 
     Parameters
     ----------
+    pair_filename : str
+        Path to two species community model file
     media_filename : str
         Path to file with exchange reaction bounds for media
-    job_queue : multiprocessing.Queue
-        Queue work is received from
-    output_queue : multiprocessing.Queue
-        Queue results are posted to
+
+    Returns
+    -------
+    pandas.Series
+        Growth rate details for interaction between two species in pair
     """
 
-    while True:
-        # Wait for work from the job queue.
-        pair_model_filename = job_queue.get()  # Format is a path to a pair model file
+    # Load the model and apply the media to it.
+    pair_model = load_model_from_file(pair_filename)
+    apply_media(pair_model, media_filename)
 
-        try:
-            # Load the model and apply the media to it.
-            pair_model = load_model_from_file(pair_model_filename)
-            apply_media(pair_model, media_filename)
+    # Optimize the model with two species together, one species knocked out, and
+    # other species knocked out.
+    t_solution = pair_model.optimize()
+    a_id = pair_model.notes['species'][0]['id']
+    b_id = pair_model.notes['species'][1]['id']
+    a_solution = single_species_knockout(pair_model, b_id)
+    b_solution = single_species_knockout(pair_model, a_id)
 
-            # Optimize the model with two species together, one species knocked out, and
-            # other species knocked out.
-            t_solution = pair_model.optimize()
-            a_id = pair_model.notes['species'][0]['id']
-            b_id = pair_model.notes['species'][1]['id']
-            a_solution = single_species_knockout(pair_model, b_id)
-            b_solution = single_species_knockout(pair_model, a_id)
-
-            # Evaluate the interaction between the two species.
-            a_objective = pair_model.notes['species'][0]['objective']
-            b_objective = pair_model.notes['species'][1]['objective']
-            a_percent_change, b_percent_change, interaction_type = \
-                evaluate_interaction(t_solution.x_dict[a_objective], t_solution.x_dict[b_objective],
-                                     a_solution.x_dict[a_objective], b_solution.x_dict[b_objective])
-            result = pd.Series([a_id, b_id, interaction_type, t_solution.f, t_solution.x_dict[a_objective],
-                                t_solution.x_dict[b_objective], a_solution.x_dict[a_objective],
-                                b_solution.x_dict[b_objective], a_percent_change, b_percent_change],
-                               index=growth_rate_columns)
-        except Exception as e:
-            result = e
-
-        # Post results to the output queue.
-        output_queue.put(result)  # Format is pandas.Series with growth rate details or exception
+    # Evaluate the interaction between the two species.
+    a_objective = pair_model.notes['species'][0]['objective']
+    b_objective = pair_model.notes['species'][1]['objective']
+    a_percent_change, b_percent_change, interaction_type = \
+        evaluate_interaction(t_solution.x_dict[a_objective], t_solution.x_dict[b_objective],
+                             a_solution.x_dict[a_objective], b_solution.x_dict[b_objective])
+    return Series([a_id, b_id, interaction_type, t_solution.f, t_solution.x_dict[a_objective],
+                   t_solution.x_dict[b_objective], a_solution.x_dict[a_objective],
+                   b_solution.x_dict[b_objective], a_percent_change, b_percent_change],
+                   index=growth_rate_columns)
 
 
 def apply_media(model, media_filename):
