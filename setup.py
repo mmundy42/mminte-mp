@@ -24,6 +24,16 @@ version = get_version(pep440=True)
 if 'sdist' in argv or 'bdist_wheel' in argv:
     update_release_version()
 
+# @todo extra with jupyter dependency?
+
+# numpy, scipy, pytz, python-dateutil
+
+requirements = [
+    'six',
+    'pandas>=0.18.0',
+    'cobra>=0.5.6'
+]
+
 # Begin constructing arguments for building package.
 setup_kwargs = {}
 
@@ -35,21 +45,19 @@ except:
     setup_kwargs['long_description'] = ''
 
 setup(
-    name='mminte',
+    name='mminte-mp',
     version=version,
     packages=find_packages(),
     setup_requires=[],
-    install_requires=['cobra >= 0.5.6', 'pandas >= 0.18.1', 'six'],
+    install_requires=requirements,
     tests_require=['pytest'],
     package_data={},
-    author='Michael Mundy <mundy.michael@mayo.edu>,'
-           'Lena Mendes Soares <@mayo.edu>',
+    author='Michael Mundy, Helena Mendes-Soares, Nicholas Chia',
     author_email='mundy.michael@mayo.edu',
     description='Microbial Metabolic interactions',
     license='BSD',
     keywords='metabolism biology optimization flux balance analysis fba',
 #    url='https://opencobra.github.io/cobrapy',
-    test_suite='cobra.test.suite',
     download_url='https://pypi.python.org/pypi/mminte',
     classifiers=[
         'Development Status :: 4 - Beta',
