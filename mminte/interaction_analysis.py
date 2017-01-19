@@ -38,6 +38,16 @@ def create_interaction_models(source_models, output_folder='data', n_processes=N
 def calculate_growth_rates(pair_models, media_filename, n_processes=None):
     """ Calculate growth rates for all pairs in community.
 
+    The media file is in JSON format and contains a dictionary with an exchange
+    reaction ID as the key and lower and upper bounds of the exchange reaction
+    as the value. For example,
+
+    {'EX_h2o': [0.0, 1000.0],
+     'EX_h2s': [-1.0, 1000.0],
+     'EX_pi': [-10.0, 1000.0],
+     ...
+    }
+
     Parameters
     ----------
     pair_models : list of str
