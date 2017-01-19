@@ -26,13 +26,15 @@ Installation
 ------------
 
 **Coming soon ...**
+
 Use pip to install mminte-mp from `PyPI <https://pypi.python.org/pypi/mminte-mp>`_
 (we recommend doing this inside a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
 
     pip install mminte-mp
 
-mminte-mp requires the cobra, pandas, and six packages.
+mminte-mp requires the cobra, pandas, and six packages. Using SBML models requires the python-libsbml and lxml
+packages.
 
 Direct installation in virtual environment
 ------------------------------------------
@@ -45,25 +47,26 @@ Direct installation in virtual environment
     $ cd mminte-mp
     $ mkvirtualenv mminte-mp --python /Library/Frameworks/Python.framework/Versions/2.7/bin/python
 
-   Use the ``--python`` option to select a specific version of Python for the virtualenv. Note on macOS, matplotlib
-   requires Python be installed as a framework but virtualenv creates a non-framework build of Python.
-   See the `matplotlib FAQ <http://matplotlib.org/1.5.3/faq/virtualenv_faq.html>`__ for details
-   on a workaround.
+   Use the ``--python`` option to select a specific version of Python for the virtualenv. For example,
+   ``python=python3`` to select the latest python3 installed on the system.
+
+   Note on macOS, matplotlib requires Python be installed as a framework but virtualenv creates a
+   non-framework build of Python. See the `matplotlib FAQ <http://matplotlib.org/1.5.3/faq/virtualenv_faq.html>`__
+   for details on a workaround.
 
 3. Upgrade pip and setuptools to the latest versions with these commands::
 
-    (mminte-mp)$ pip install --upgrade pip
-    (mminte-mp)$ pip install --upgrade setuptools
+    (mminte-mp)$ pip install --upgrade pip setuptools
 
-4. Install all of the dependencies with this command::
+4. Install all of the mminte-mp dependencies with this command::
 
     (mminte-mp) pip install -r requirements.txt
+
+   This command can take a few minutes while numpy, pandas, and libsbml are built in the virtualenv.
 
 5. Install the latest version of mminte-mp with this command::
 
     (mminte-mp)$ python setup.py install
-
-   This command takes a few minutes while numpy, pandas, and libsbml are built in the virtualenv.
 
 Run examples in a notebook
 --------------------------
