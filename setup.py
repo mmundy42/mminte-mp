@@ -1,4 +1,4 @@
-from os.path import isfile, abspath, dirname, join
+from os.path import abspath, dirname, join
 from sys import argv, path
 
 # To temporarily modify sys.path
@@ -54,11 +54,11 @@ setup(
     package_data={},
     author='Michael Mundy, Helena Mendes-Soares, Nicholas Chia',
     author_email='mundy.michael@mayo.edu',
-    description='Microbial Metabolic interactions',
+    description='Microbial Metabolic interactions multiprocessor',
     license='BSD',
     keywords='metabolism biology optimization flux balance analysis fba',
-#    url='https://opencobra.github.io/cobrapy',
-    download_url='https://pypi.python.org/pypi/mminte',
+    url='https://github.com/mmundy42/mminte-mp',
+    # download_url='https://pypi.python.org/pypi/mminte',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
