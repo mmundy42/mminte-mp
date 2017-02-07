@@ -1,10 +1,11 @@
 import pytest
+from os.path import join, abspath, dirname
 
 
 @pytest.fixture(scope='session')
 def data_folder():
-    # PATRIC genome ID for Bacteroides thetaiotaomicron VPI-5482
-    return 'mminte/test/data'
+    mminte_folder = abspath(join(dirname(abspath(__file__)), '..'))
+    return join(mminte_folder, 'test', 'data', '')
 
 
 @pytest.fixture(scope='session')

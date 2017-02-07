@@ -29,7 +29,7 @@ if 'sdist' in argv or 'bdist_wheel' in argv:
 requirements = [
     'six',
     'pandas>=0.18.0',
-    'cobra>=0.5.6'
+    'cobra>=0.5.4'
 ]
 
 # Begin constructing arguments for building package.
