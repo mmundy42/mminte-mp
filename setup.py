@@ -26,8 +26,6 @@ if 'sdist' in argv or 'bdist_wheel' in argv:
 
 # @todo extra with jupyter dependency?
 
-# numpy, scipy, pytz, python-dateutil
-
 requirements = [
     'six',
     'pandas>=0.18.0',
@@ -51,7 +49,9 @@ setup(
     setup_requires=[],
     install_requires=requirements,
     tests_require=['pytest'],
-    package_data={},
+    package_data={
+         '': ['test/data/*', 'VERSION']
+    },
     author='Michael Mundy, Helena Mendes-Soares, Nicholas Chia',
     author_email='mundy.michael@mayo.edu',
     description='Microbial Metabolic interactions multiprocessor',
