@@ -13,7 +13,7 @@ class TestInteractions:
         source_models = [join(data_folder, x) for x in model_files]
         pair_models = mminte.create_interaction_models(source_models, output_folder=gettempdir())
         assert len(pair_models) == 1
-        assert pair_models[0] == '{0}/BTxFP.json'.format(gettempdir())
+        assert pair_models[0] == '{0}/BTxFP.json'.format(gettempdir()) or pair_models[0] == '{0}/FPxBT.json'.format(gettempdir())
 
         growth_rates = mminte.calculate_growth_rates(pair_models, join(data_folder, 'western.json'))
         assert growth_rates.at[0, 'A_ID'] == 'BT'
